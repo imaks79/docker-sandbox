@@ -1,0 +1,17 @@
+# Скопируйте этот файл в ./Dockerfile, чтобы sandbox.sh собирал и
+# использовал ваш образ вместо простого ubuntu:latest.
+# Так доустановленные пакеты не потеряются при удалении контейнера
+# (./sandbox.sh rm) — они уже "зашиты" в образ.
+#
+# После правок пересоберите образ:
+#   ./sandbox.sh rebuild
+
+FROM ubuntu:latest
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    vim \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
