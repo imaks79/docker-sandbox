@@ -121,6 +121,6 @@
 
 ## Общая шпаргалка по Docker
 
-См. [DOCKER_CHEATSHEET.md](./DOCKER_CHEATSHEET.md) — базовые команды
+См. [DOCKER_CHEATSHEET.md](DOCKER_CHEATSHEET.md) — базовые команды
 для работы с образами, контейнерами, томами и сетями, не привязанные
 к этому скрипту.
