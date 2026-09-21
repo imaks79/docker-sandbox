@@ -1,6 +1,7 @@
-# Образ для тестирования bootstrap-скриптов проекта dotfiles
-# (../dotfiles — виден внутри контейнера как /workspace/dotfiles через
-# симлинк workspace/dotfiles -> ../../dotfiles).
+# Образ для тестирования bootstrap-скриптов проектов dotfiles и fastinstall
+# (../dotfiles и ../fastinstall — видны внутри контейнера как
+# /workspace/dotfiles и /workspace/fastinstall через bind mount,
+# см. sandbox.sh).
 #
 # Пересобрать после правок:  ./sandbox.sh rebuild
 # Запустить и потестировать:
@@ -30,3 +31,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rsync \
     locales \
     && rm -rf /var/lib/apt/lists/*
+
+# Без UTF-8-локали внутри контейнера (locale показывает POSIX, LANG/LC_ALL
+# пустые) многобайтовые PUA-символы Nerd Font в tmux status-bar долетают до
+# терминала хоста битыми, даже если сам терминал (Alacritty) настроен
+# правильно. locale-gen нужен явный — en_US.UTF-8 не включена по умолчанию
+# в пакете locales на Ubuntu.
+RUN locale-gen en_US.UTF-8 \
+    && update-locale LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
