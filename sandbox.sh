@@ -9,6 +9,7 @@ set -euo pipefail
 
 WORKDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE="$WORKDIR/workspace"
+PROJECTS_ROOT="$(cd "$WORKDIR/.." && pwd)"
 mkdir -p "$WORKSPACE"
 
 usage() {
@@ -27,7 +28,7 @@ usage() {
   -u                  запускать процессы от имени текущего пользователя хоста,
                       чтобы файлы в ./workspace не создавались от root
   -s                  пробросить порты Samba/SMB, чтобы smbd из
-                      workspace/dotfiles/samba-share.sh был виден снаружи.
+                      workspace/fastinstall/samba-share.sh был виден снаружи.
                       TCP 445 внутри контейнера публикуется на хостовый порт
                       $SAMBA_HOST_PORT, а не на 445 — на macOS порт 445 всегда занят
                       системным File Sharing (com.apple.smbd), даже если он
@@ -115,6 +116,18 @@ if [[ -n "$EXISTS" ]] && { [[ ${#PORTS[@]} -gt 0 ]] || [[ -n "$MEMORY" ]] || [[ 
 fi
 
 RUN_ARGS=(-d --name "$NAME" -v "$WORKSPACE:/workspace" -w /workspace)
+
+# Соседние проекты dotfiles и fastinstall (../dotfiles, ../fastinstall)
+# пробрасываются bind mount'ом напрямую как /workspace/dotfiles и
+# /workspace/fastinstall — без промежуточного копирования: правки внутри
+# контейнера сразу видны на хосте и наоборот, git-история доступна как есть.
+for proj in dotfiles fastinstall; do
+    src="$PROJECTS_ROOT/$proj"
+    if [[ -d "$src" ]]; then
+        RUN_ARGS+=(-v "$src:/workspace/$proj")
+    fi
+done
+
 [[ ${#PORTS[@]} -gt 0 ]] && RUN_ARGS+=("${PORTS[@]}")
 [[ -n "$MEMORY" ]] && RUN_ARGS+=(--memory "$MEMORY")
 [[ -n "$CPUS" ]] && RUN_ARGS+=(--cpus "$CPUS")
