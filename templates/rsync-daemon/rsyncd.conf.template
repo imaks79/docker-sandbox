@@ -1,0 +1,15 @@
+uid = root
+gid = root
+use chroot = no
+max connections = 8
+log file = /var/log/rsyncd.log
+pid file = /var/run/rsyncd.pid
+port = __RSYNC_PORT__
+
+[workspace]
+   path = __RSYNC_SHARE_PATH__
+   comment = docker-sandbox rsync daemon
+   read only = __RSYNC_READ_ONLY__
+   list = yes
+   auth users = __RSYNC_USER__
+   secrets file = /etc/rsyncd.secrets

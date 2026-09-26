@@ -1,0 +1,6 @@
+[Unit]
+Description=Учебная задача systemd-timer: пишет метку времени в /workspace
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo "$(date -Is) tick from systemd timer (PID $$)" >> /workspace/systemd-timer.log'

@@ -27,6 +27,8 @@
 
 ```
 ./sandbox.sh [опции] [образ] [имя]
+./sandbox.sh -t ШАБЛОН [опции] [имя]
+./sandbox.sh templates
 ./sandbox.sh stop    [имя]
 ./sandbox.sh rm      [имя]
 ./sandbox.sh logs    [имя]
@@ -39,13 +41,40 @@
 
 | Опция | Что делает | Пример |
 |---|---|---|
+| `-t ШАБЛОН` | Развернуть готовый шаблон из `templates/` вместо обычного образа | `-t samba-ready` |
 | `-p HOST:CONTAINER` | Проброс порта, можно указывать несколько раз | `-p 8080:80` |
 | `-m LIMIT` | Лимит памяти | `-m 512m`, `-m 1g` |
 | `-c LIMIT` | Лимит CPU | `-c 1.5` |
 | `-u` | Запускать процессы от текущего пользователя хоста, а не root | `-u` |
+| `-s` | Пробросить порты Samba/SMB наружу (для шаблонов `samba-*`) | `-s` |
+| `-n` | Capability NET_ADMIN/NET_RAW + `/dev/net/tun` (для `firewall-lab`, `wireguard-ready`) | `-n` |
+| `-i` | Режим systemd как PID 1: `--privileged` + cgroup mount (для `systemd-timer`) | `-i` |
 
 Если контейнер с таким именем уже существует, эти опции игнорируются —
 скрипт предупредит и подскажет сначала выполнить `./sandbox.sh rm <имя>`.
+
+## Готовые шаблоны
+
+`templates/` — набор готовых и учебных сценариев, каждый разворачивается
+одной командой:
+
+```bash
+./sandbox.sh templates                        # список всех шаблонов
+./sandbox.sh -s -t samba-ready share           # готовая Samba-шара
+./sandbox.sh -s -t samba-manual samba-training # тренировка настройки Samba руками
+./sandbox.sh -n -t firewall-lab fw             # firewall (nftables/iptables) внутри контейнера
+./sandbox.sh -n -p 51820:51820/udp -t wireguard-ready vpn   # WireGuard-туннель хост<->контейнер
+./sandbox.sh -i -t systemd-timer sysd          # systemd как PID 1, сравнение с cron
+./sandbox.sh -p 873:873 -t rsync-daemon backup # rsync daemon, инкрементальные бэкапы
+./sandbox.sh -p 8384:8384 -p 22000:22000 -p 22000:22000/udp -p 21027:21027/udp -t syncthing sync  # постоянная синхронизация
+```
+
+С `-t` первый позиционный аргумент — это **имя контейнера**, а не образ
+(образ определяется шаблоном). Подробности каждого шаблона — в его
+`README.md`/`TUTORIAL.md` внутри `templates/<имя>/`.
+
+Идеи, какие ещё шаблоны стоит сюда добавить, и общий формат для новых —
+см. [LEARNING_IDEAS.md](LEARNING_IDEAS.md).
 
 ### Примеры
 
